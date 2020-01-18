@@ -19,6 +19,9 @@ class EqualBinSpace:
             vect.append(heatmap[i][i+1])
         return vect
 
+'''
+Generates equiprobable bin spacings assuming a Gaussian distribution
+'''
 class GaussBinSpace:
     def __init__(self,nbins):
         self.nbins = nbins
@@ -35,6 +38,10 @@ class GaussBinSpace:
             vect.append(heatmap[i][i+1])
         return vect
 
+    
+'''
+Generates equiprobable bin spacings assuming no probability distribution
+'''
 class EquiBinSpace:
     def __init__(self,nbins):
         self.nbins = nbins
@@ -53,30 +60,17 @@ class EquiBinSpace:
             vect.append(heatmap[i][i+1])
         return vect
 
+    
 def sax_normalize(x):
     '''Because SAX says to normalize mean and variance'''
     x2 = x - np.average(x)
     x3 = x2/np.std(x2)
     return x3
-'''
-def getBreakpoints(k): #k is size of alphabet
-    alpha = 1/k #probability of each region
-    beta = np.zeros(k-1)
-    for i in range(k-1):
-        beta[i] = st.norm.ppf(alpha*(i+1))
-    return beta
-'''
-def getBreakpoints(k): #k is size of alphabet
-    alpha = 1/k #probability of each region
-    beta = np.zeros(k-1)
-    for i in range(k-1):
-        beta[i] = st.norm.ppf(alpha*(i+1))
-    beta2 = np.zeros(k+1)
-    beta2[1:-1] = beta
-    beta2[0] = -1*np.inf
-    beta2[-1] = np.inf
-    return beta2
 
+
+'''
+takes signal and desired spacing strategy and generates your word. 1D vector of voltage values
+'''
 def to_word_bins(sig,space):
     bins = space.get_bins(sig)
     word = np.ones(len(sig))*-1
@@ -85,6 +79,10 @@ def to_word_bins(sig,space):
         word[np.where(is_bin)] = i
     return word
 
+
+'''
+takes a SAX word and generates a fingerprint sliding window size of 2 is hard coded in this function and all others
+'''
 def word_to_subword_space(word,space):
     heatmap = np.zeros((space.nbins,space.nbins))
     for i in range(len(word)-1):
@@ -100,78 +98,18 @@ def isnormaldist(x):
 
 
 '''
-v1, v2 = read_ae_file2("/home/nolan/Desktop/gg.txt")
-NBINS = 5
-space = EqualBinSpace(NBINS)
-avg1 = np.zeros((NBINS,NBINS))
-#get average fibercrack matrix from 
-for i in range(0,25):
-    sig1 = v1[i]
-    sig2 = v2[i]
-    sig = sig2
-    if max(np.abs(sig1)) > max(np.abs(sig2)):
-        sig = sig1
-    word = to_word_bins(sig,space)
-    heatmap = word_to_subword_space(word,space)
-    avg1+= heatmap
-
-avg1 = avg1/25
-
-avg2 = np.zeros((NBINS,NBINS))
-for i in range(-2,-22,-1):
-    sig1 = v1[i]
-    sig2 = v2[i]
-    sig = sig2
-    if max(np.abs(sig1)) > max(np.abs(sig2)):
-        sig = sig1
-    word = to_word_bins(sig,space)
-    heatmap = word_to_subword_space(word,space)
-    avg2+= heatmap
- 
-avg2 = avg2/20
-
-#avg1[4][4] = 0
-#avg2[4][4] = 0
-
-#test data
-isf = 0
-ism = 0
-for i in range(25,43):
-    sig1 = v1[i]
-    sig2 = v2[i]
-    sig = sig2
-    if max(np.abs(sig1)) > max(np.abs(sig2)):
-        sig = sig1
-    word = to_word_bins(sig,space)
-    heatmap = word_to_subword_space(word,space)
-
-    matrix_crack = np.sum((avg1 - heatmap)**2)
-    fiber_break = np.sum((avg2 - heatmap)**2)
-    if matrix_crack > fiber_break:
-        ism+=1
-    else:
-        isf +=1
-
-print('matrix prediction sucess',ism/(ism+isf))
-
-for i in range(-22,-40,-1):
-    sig1 = v1[i]
-    sig2 = v2[i]
-    sig = sig2
-    if max(np.abs(sig1)) > max(np.abs(sig2)):
-        sig = sig1
-    word = to_word_bins(sig,space)
-    heatmap = word_to_subword_space(word,space)
-
-    matrix_crack = np.sum((avg1 - heatmap)**2)
-    fiber_break = np.sum((avg2 - heatmap)**2)
-    if matrix_crack > fiber_break:
-        ism+=1
-    else:
-        isf +=1
-
-print('matrix prediction sucess',isf/(ism+isf))
-
-
+v1, v2 are the different channels, space is defined breakpoints. Classes of these
+can be found in SAX.py
 '''
-
+def get_heatmaps(v1,v2,space):
+    X = []
+    for i in range(0,len(v1)):
+        sig1 = v1[i]
+        sig2 = v2[i]
+        sig = sig2
+        if max(np.abs(sig1)) > max(np.abs(sig2)):
+            sig = sig1
+        word = to_word_bins(sig,space)
+        heatmap = word_to_subword_space(word,space)
+        X.append(space.to_vect(heatmap))
+    return X
