@@ -101,6 +101,12 @@ def isnormaldist(x):
 v1, v2 are the different channels, space is defined breakpoints. Classes of these
 can be found in SAX.py
 '''
+
+def get_fingerprint(sig,space):
+    word = to_word_bins(sig,space)
+    heatmap = word_to_subword_space(word,space)
+    return heatmap
+
 def get_heatmaps(v1,v2,space):
     X = []
     for i in range(0,len(v1)):
