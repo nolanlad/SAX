@@ -42,7 +42,6 @@ class GaussBinSpace:
 
 '''
 Generates equiprobable bin spacings assuming no probability distribution.
-THIS CLASS IS NOT CURRENTLY FUNCTIONAL, DO NOT USE
 '''
 class EquiBinSpace:
     def __init__(self,nbins):
@@ -101,7 +100,7 @@ def isnormaldist(x):
 
 '''
 v1, v2 are the different channels, space is defined breakpoints. Classes of these
-can be found above
+can be found above.
 '''
 def get_heatmaps(v1,v2,space):
     X = []
