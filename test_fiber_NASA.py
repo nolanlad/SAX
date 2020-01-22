@@ -1,5 +1,4 @@
 from SAX import *
-from total_sax_cluster import *
 from sklearn.cluster import KMeans
 import sklearn
 import warnings
@@ -7,11 +6,12 @@ import gap
 import pickle
 
 
-v1,v2 = read_ae_file2("./NASAFS/NHDT1.txt")
+v1,v2 = read_ae_file2("./Data_from_Amjad/Batch_1/HNSB1-1.txt")
 #5 bins, anything > 7 led to overfitting of the data, bad test results
 #NBINS = 5
 NBINS = 5
 space = EqualBinSpace(NBINS)
+
 '''
 X = []
 for i in range(0,len(v1)):
@@ -31,8 +31,8 @@ for i in range(2,11):
     kmeans = KMeans(n_clusters=i, random_state=0).fit(X)
     inert.append(kmeans.inertia_)
     silh.append(sklearn.metrics.silhouette_score(X,kmeans.labels_))
-'''
-'''
+
+
 def get_heatmaps(v1,v2):
     X = []
     for i in range(0,len(v1)):
@@ -46,14 +46,17 @@ def get_heatmaps(v1,v2):
         X.append(space.to_vect(heatmap))
     return X
 '''
+
+
 def pct_cluster(labels):
     return np.bincount(labels)/len(labels)
-
+'''
 v1, v2 = read_ae_file2("/home/nolan/Desktop/gg.txt")
 X = get_heatmaps(v1,v2,space)
 Xref = X
 inert = []
 silh = []
+'''
 '''
 for i in range(2,11):
     print(i)

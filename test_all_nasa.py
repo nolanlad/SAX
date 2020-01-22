@@ -1,5 +1,4 @@
 from SAX import *
-from total_sax_cluster import *
 from sklearn.cluster import KMeans
 import sklearn
 import warnings
@@ -113,12 +112,12 @@ for f in batch1_fns:
     #plt.show()
 jkl = []
 for i in range(2,11):
-    
+
     kmeans =  KMeans(n_clusters=i)
     kmeans.fit(Xp)
     v = sklearn.metrics.davies_bouldin_score(Xp,kmeans.labels_)
     jkl.append(v)
-    
+
 
 labs = kmeans.predict(Xp)
 
