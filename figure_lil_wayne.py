@@ -1,5 +1,5 @@
 from SAX import *
-from total_sax_cluster import *
+
 
 v1, v2 = read_ae_file2("/home/nolan/Desktop/gg.txt")
 X = get_heatmaps(v1,v2)
@@ -15,7 +15,7 @@ NBINS = 5
 space = GaussBinSpace(NBINS)
 avg1 = np.zeros((NBINS,NBINS))
 for i in np.where(lads==4)[0][:20]:
-    
+
     sig1 = v1[i]
     sig2 = v2[i]
     sig = sig2
@@ -55,7 +55,7 @@ NBINS = 5
 space = GaussBinSpace(NBINS)
 avg1 = np.zeros((NBINS,NBINS))
 for i in np.where(lads==4)[0][:20]:
-    
+
     sig1 = v1[i]
     sig2 = v2[i]
     sig = sig2
@@ -82,5 +82,3 @@ avg2 = avg2/20
 
 ax[1][0].imshow(avg1)
 ax[1][1].imshow(avg2)
-
-

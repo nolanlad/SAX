@@ -21,6 +21,7 @@ class EqualBinSpace:
 
 '''
 Generates equiprobable bin spacings assuming a Gaussian distribution
+Note this functionality does not work
 '''
 class GaussBinSpace:
     def __init__(self,nbins):
@@ -40,7 +41,8 @@ class GaussBinSpace:
 
 
 '''
-Generates equiprobable bin spacings assuming no probability distribution
+Generates equiprobable bin spacings assuming no probability distribution.
+THIS CLASS IS NOT CURRENTLY FUNCTIONAL, DO NOT USE
 '''
 class EquiBinSpace:
     def __init__(self,nbins):
