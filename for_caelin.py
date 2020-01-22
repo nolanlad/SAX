@@ -1,11 +1,20 @@
 from SAX import *
-from total_sax_cluster import *
 from sklearn.cluster import KMeans
 import sklearn
 import warnings
 import gap
 import glob
 import pickle
+
+
+'''
+TEMPLATE CODE
+'''
+
+
+
+
+
 
 NBINS = 5
 space = EqualBinSpace(NBINS)
@@ -27,7 +36,7 @@ for f in batch1_fns:
     plt.legend(["D-B","silh"])
     plt.savefig("scores_"+f[-5]+"_batch1.png")
     plt.show()
-    
+
 batch1_fns = glob.glob("./Raw waveforms/Raw waveforms/Data from Amjad/Batch 2/*")
 for f in batch1_fns:
     v1, v2 = read_ae_file2(f)

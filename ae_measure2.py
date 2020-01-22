@@ -7,6 +7,13 @@ from scipy.stats import linregress
 nan = float('nan')
 inf = float('inf')
 
+'''
+We should talk about the other functions in this file, i.e. everything that isn't
+read_ae_file or read_ae_file2. They may become nessecary later, however we might
+want to consider moving things around for readability.
+'''
+
+
 def read_ae_file(fname):
     f = open(fname)
     lines = f.readlines()[1:]
@@ -17,7 +24,9 @@ def read_ae_file(fname):
     f.close()
     return v1,v2
 
-
+'''
+Outputs an array v1, v2 whose elements are an individual signal (set of 1024 data points)
+'''
 def read_ae_file2(fname):
     f = open(fname)
     lines = f.readlines()[1:]

@@ -21,6 +21,7 @@ class EqualBinSpace:
 
 '''
 Generates equiprobable bin spacings assuming a Gaussian distribution
+Note this functionality does not work
 '''
 class GaussBinSpace:
     def __init__(self,nbins):
@@ -38,16 +39,17 @@ class GaussBinSpace:
             vect.append(heatmap[i][i+1])
         return vect
 
-    
+
 '''
-Generates equiprobable bin spacings assuming no probability distribution
+Generates equiprobable bin spacings assuming no probability distribution.
+THIS CLASS IS NOT CURRENTLY FUNCTIONAL, DO NOT USE
 '''
 class EquiBinSpace:
     def __init__(self,nbins):
         self.nbins = nbins
     def get_bins(self,sig):
         #return getBreakpoints(self.nbins)
-        bins = [np.percentile(sig,(100*i)/self.nbins) 
+        bins = [np.percentile(sig,(100*i)/self.nbins)
         for i in range(self.nbins+1)]
         return bins
     def to_vect(self,heatmap):
@@ -60,7 +62,7 @@ class EquiBinSpace:
             vect.append(heatmap[i][i+1])
         return vect
 
-    
+
 def sax_normalize(x):
     '''Because SAX says to normalize mean and variance'''
     x2 = x - np.average(x)
@@ -99,14 +101,8 @@ def isnormaldist(x):
 
 '''
 v1, v2 are the different channels, space is defined breakpoints. Classes of these
-can be found in SAX.py
+can be found above
 '''
-
-def get_fingerprint(sig,space):
-    word = to_word_bins(sig,space)
-    heatmap = word_to_subword_space(word,space)
-    return heatmap
-
 def get_heatmaps(v1,v2,space):
     X = []
     for i in range(0,len(v1)):
