@@ -26,16 +26,18 @@ import pylab as pl
 
 # initialize number of bins (i.e alphabet cardinality), binning scheme, and others
 NBINS = 5
-space = EqualBinSpace(NBINS) #Should consider equiprobable bins
+space = EqualBinSpace(NBINS) # have considered equiprobable, it doesn't work
 max_cluster = 11
 
 # Read in file set, to be used for later
 batch1_fns = glob.glob("./raw_waveform_txt/VTE_1/*.txt")
 
-
+'''
 # Read in single file
 v1,v2 = read_ae_file2(batch1_fns[0])
 X = get_heatmaps(v1,v2,space)
+'''
+
 
 for f in batch1_fns:
 

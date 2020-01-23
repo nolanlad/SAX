@@ -6,6 +6,15 @@ import sklearn
 import numpy as np
 import pylab as pl
 
+
+'''
+This is Caelin's spaghetti factory
+'''
+
+
+
+
+
 # initialize number of bins (i.e alphabet cardinality), binning scheme, and others
 NBINS = 5
 space = EqualBinSpace(NBINS) #Should consider equiprobable bins
