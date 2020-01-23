@@ -1,3 +1,15 @@
+'''
+Author: Nolan McCarthy
+Contact: nolanrmccarthy@gmail.com
+Version: 200122
+
+This is a class definition and function definition file for SAX clustering routine
+as developed by the Daly Lab
+'''
+
+
+
+
 from ae_measure2 import read_ae_file2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -114,3 +126,8 @@ def get_heatmaps(v1,v2,space):
         heatmap = word_to_subword_space(word,space)
         X.append(space.to_vect(heatmap))
     return X
+
+def get_fingerprint(sig,space):
+    word = to_word_bins(sig,space)
+    heatmap = word_to_subword_space(word,space)
+    return heatmap

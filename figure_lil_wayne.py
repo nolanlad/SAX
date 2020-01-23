@@ -1,18 +1,18 @@
 from SAX import *
 
-
+'''
 v1, v2 = read_ae_file2("/home/nolan/Desktop/gg.txt")
 X = get_heatmaps(v1,v2)
 kmeans = KMeans(n_clusters=5, random_state=0).fit(X)
 lads = kmeans.labels_
+'''
+v1, v2 = read_ae_file2("./Data_from_Amjad/Batch_1/HNSB1-1.txt")
 
-v1, v2 = read_ae_file2("./minicomp-dat/1-3.txt")
-
-X = get_heatmaps(v1,v2)
-lads = kmeans.predict(X)
 
 NBINS = 5
-space = GaussBinSpace(NBINS)
+space = EqualBinSpace(NBINS)
+X = get_heatmaps(v1,v2,space)
+
 avg1 = np.zeros((NBINS,NBINS))
 for i in np.where(lads==4)[0][:20]:
 
@@ -44,7 +44,7 @@ fig,ax = plt.subplots(nrows=2,ncols=2)
 
 ax[0][0].imshow(avg1)
 ax[0][1].imshow(avg2)
-
+'''
 
 v1, v2 = read_ae_file2("./minicomp-dat/2-4.txt")
 
@@ -82,3 +82,4 @@ avg2 = avg2/20
 
 ax[1][0].imshow(avg1)
 ax[1][1].imshow(avg2)
+'''
