@@ -43,7 +43,6 @@ for f in batch1_fns:
 
     silh = np.array([])
     db_score = np.array([])
-    CH_index = np.array([])
 
 
     # Cluster and get stat

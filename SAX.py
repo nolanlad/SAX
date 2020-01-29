@@ -114,20 +114,34 @@ def isnormaldist(x):
 v1, v2 are the different channels, space is defined breakpoints. Classes of these
 can be found above.
 '''
+
 def get_heatmaps(v1,v2,space):
     X = []
-    for i in range(0,len(v1)):
-        sig1 = v1[i]
-        sig2 = v2[i]
-        sig = sig2
-        if max(np.abs(sig1)) > max(np.abs(sig2)):
-            sig = sig1
+    for i in range(len(v1)): # get highest signal
+        if max(abs(v1[i])) > max(abs(v2[i])):
+            sig=v1[i]
+        else:
+            sig=v2[i]
+
         word = to_word_bins(sig,space)
         heatmap = word_to_subword_space(word,space)
         X.append(space.to_vect(heatmap))
     return X
 
+
 def get_fingerprint(sig,space):
     word = to_word_bins(sig,space)
     heatmap = word_to_subword_space(word,space)
     return heatmap
+
+
+'''
+Takes in a fingerprint object and upscales it so it can actually be viewed when
+you save and open it >:(
+'''
+def upscale(fingerprint, scale=80):
+    new_data = np.zeros(np.array(fingerprint.shape) * scale)
+    for j in range(fingerprint.shape[0]):
+        for k in range(fingerprint.shape[1]):
+            new_data[j * scale: (j+1) * scale, k * scale: (k+1) * scale] = fingerprint[j, k]
+    return new_data
