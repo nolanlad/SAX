@@ -13,6 +13,16 @@ read_ae_file or read_ae_file2. They may become nessecary later, however we might
 want to consider moving things around for readability.
 '''
 
+def filter_ae(ae_file, filter_csv):
+    csv = pandas.read_csv(filter_csv)
+    events = np.array(csv.Event)
+    ev = events[np.where(np.isnan(events) == False)]
+    ev = ev.astype(int)
+    v1,v2 = read_ae_file2(ae_file)
+    v1 = np.array(v1); v2 = np.array(v2)
+    v1 = v1[ev-1]
+    v2 = v2[ev-1]
+    return v1,v2,ev
 
 def read_ae_file(fname):
     f = open(fname)
