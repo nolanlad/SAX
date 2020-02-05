@@ -14,6 +14,10 @@ want to consider moving things around for readability.
 '''
 
 def filter_ae(ae_file, filter_csv):
+    '''
+    ae_file: text file containing voltage over time
+    filter_csv: file of useful events, must be csv
+    '''
     csv = pandas.read_csv(filter_csv)
     events = np.array(csv.Event)
     ev = events[np.where(np.isnan(events) == False)]
