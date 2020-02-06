@@ -1,3 +1,8 @@
+
+'''
+This is Caelin's spaghetti factory
+'''
+
 #Imports
 from SAX import *
 from sklearn.cluster import KMeans
@@ -7,9 +12,6 @@ import numpy as np
 import pylab as pl
 import os
 
-'''
-This is Caelin's spaghetti factory
-'''
 
 home = os.getcwd()
 
@@ -36,13 +38,13 @@ os.chdir(home)
 sig = v1[0]
 H = get_fingerprint(sig,space)
 #pl.imshow(H, cmap='Blues')
+print(type(sig))
 
-
-
+'''
 scale = 80
 new_data = np.zeros(np.array(H.shape) * scale)
 for j in range(H.shape[0]):
     for k in range(H.shape[1]):
         new_data[j * scale: (j+1) * scale, k * scale: (k+1) * scale] = H[j, k]
-
-pl.imsave('test.png', new_data, cmap='Blues')
+'''
+pl.imsave('test.png', H, cmap='Blues')

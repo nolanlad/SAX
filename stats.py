@@ -19,6 +19,8 @@ import sklearn
 import numpy as np
 import pylab as pl
 import matplotlib.ticker as ticker
+from ae_measure2 import *
+from scipy.cluster.vq import whiten
 
 # initialize number of bins (i.e alphabet cardinality), binning scheme, and others
 NBINS = 5
@@ -27,19 +29,20 @@ min_cluster = 2
 max_cluster = 12
 
 # Read in file set, to be used for later
-batch1_fns = glob.glob("./VTE_2/*.txt")
-
-'''
-# Read in single file
-v1,v2 = read_ae_file2(batch1_fns[0])
-X = get_heatmaps(v1,v2,space)
-'''
+batch1_fns = glob.glob("./Raw_Data/VTE_2/*.txt")
+print(batch1_fns)
 
 
 for f in batch1_fns:
 
-    v1, v2 = read_ae_file2(f)
+    v1, v2, ev= read_ae_file2(f)
     X = get_heatmaps(v1,v2,space)
+
+    '''
+    Whiten data - equivalent to applying Mahanobolis metric
+
+    X = whiten(X)
+    '''
 
     silh = np.array([])
     db_score = np.array([])

@@ -117,12 +117,8 @@ can be found above.
 
 def get_heatmaps(v1,v2,space):
     X = []
-    for i in range(len(v1)): # get highest signal
-        if max(abs(v1[i])) > max(abs(v2[i])):
-            sig=v1[i]
-        else:
-            sig=v2[i]
-
+    for i in range(len(v1)):
+        sig = max_sig(v1[i], v2[i]) # get highest signal
         word = to_word_bins(sig,space)
         heatmap = word_to_subword_space(word,space)
         X.append(space.to_vect(heatmap))
@@ -138,6 +134,9 @@ def get_fingerprint(sig,space):
 '''
 Takes in a fingerprint object and upscales it so it can actually be viewed when
 you save and open it >:(
+
+Note, this is a really hacky way to do it and under any other circumstances,
+i.e. not a bit map, I don't think this would work
 '''
 def upscale(fingerprint, scale=80):
     new_data = np.zeros(np.array(fingerprint.shape) * scale)
@@ -145,3 +144,15 @@ def upscale(fingerprint, scale=80):
         for k in range(fingerprint.shape[1]):
             new_data[j * scale: (j+1) * scale, k * scale: (k+1) * scale] = fingerprint[j, k]
     return new_data
+
+
+'''
+Takes in single signals from 2 channels and outputs the one with highest reading
+Takes in np.array
+'''
+def max_sig(signal1, signal2):
+    if max(abs(signal1)) > max(abs(signal2)):
+        sig=signal1
+    else:
+        sig=signal2
+    return sig

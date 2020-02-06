@@ -9,6 +9,10 @@ and prints each fingerprint to a folder for its respective label. Labels of Fing
 correspond to Danny Don't-Vito.png
 
 Note the initialization scheme defaults to k-means++. Random state is not called.
+
+
+Also, you have to manually delete the contents of the cluster_i_prints folder prior
+to running, otherwise you will get prints from the last run mixed in.
 '''
 
 #Imports
@@ -20,6 +24,9 @@ import numpy as np
 import pylab as pl
 import matplotlib.ticker as ticker
 import os
+from ae_measure2 import *
+from scipy.cluster.vq import whiten
+
 
 # set paths for different clusters
 path1 = '/cluster_1_prints'
@@ -31,15 +38,19 @@ home = os.getcwd()
 # initialize number of bins (i.e alphabet cardinality), binning scheme, and others
 NBINS = 5
 space = EqualBinSpace(NBINS) # have considered equiprobable, it doesn't work
-min_cluster = 2
-max_cluster = 12
 
 # Read in single file, to be used for later
-batch1_fns = glob.glob("./VTE_1/HNS2_100418_2-2.txt")
+batch1_fns = glob.glob("./Raw_Data/VTE_2/HNS2_0826.txt")
 
 # Read in single file
-v1,v2 = read_ae_file2(batch1_fns[0])
+v1,v2, ev = read_ae_file2(batch1_fns[0])
 X = get_heatmaps(v1,v2,space)
+
+'''
+Whiten data - equivalent to applying Mahanobolis metric
+
+X = whiten(X)
+'''
 
 # Set empty stat array
 silh = np.array([])
@@ -76,6 +87,7 @@ plot1 = ax1.scatter(range(len(lads)), lads+1 , color=color1, linewidth=width) #p
 
 pl.title('Danny Don\'t-vito', fontsize=BIGGER_SIZE)
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
+
 
 pl.savefig('Danny_dont_vito.png')
 

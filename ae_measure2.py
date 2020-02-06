@@ -17,6 +17,8 @@ def filter_ae(ae_file, filter_csv):
     '''
     ae_file: text file containing voltage over time
     filter_csv: file of useful events, must be csv
+    return: (v1, v2, event_num), where v1 and v2 are the within gauge signals and
+            event_number is the event number indexed from 1
     '''
     csv = pandas.read_csv(filter_csv)
     events = np.array(csv.Event)
@@ -26,7 +28,38 @@ def filter_ae(ae_file, filter_csv):
     v1 = np.array(v1); v2 = np.array(v2)
     v1 = v1[ev-1]
     v2 = v2[ev-1]
-    return v1,v2,ev
+    return v1, v2, ev
+
+
+
+def read_ae_file2(fname, sig_length=1024):
+    '''
+    fname: text file containing voltage over time
+    filter_csv: file of useful events, must be csv
+    return: (v1, v2, event_num), where v1 and v2 are the within gauge signals and
+            event_number is the event number indexed from 1
+    '''
+    f = open(fname)
+    lines = f.readlines()[1:]
+    v1 = np.array([
+        float(line.split()[0]) for line in lines])
+    v2 = np.array([
+        float(line.split()[1]) for line in lines])
+    f.close()
+
+    v1s = []
+    v2s = []
+    for i in range(0,len(v1),sig_length):
+        v1s.append(v1[i:i+sig_length])
+        v2s.append(v2[i:i+sig_length])
+    ev = list(range(int(len(v1)/sig_length))) # makes list [0,1,2,...,n]
+    ev = np.array([x+1 for x in ev]) #indexes from 1 and casts as list
+    v1s = np.array(v1s)
+    v2s = np.array(v2s)
+
+    return v1s, v2s, ev
+
+
 
 def read_ae_file(fname):
     f = open(fname)
@@ -38,23 +71,6 @@ def read_ae_file(fname):
     f.close()
     return v1,v2
 
-'''
-Outputs an array v1, v2 whose elements are an individual signal (set of 1024 data points)
-'''
-def read_ae_file2(fname):
-    f = open(fname)
-    lines = f.readlines()[1:]
-    v1 = np.array([
-        float(line.split()[0]) for line in lines])
-    v2 = np.array([
-        float(line.split()[1]) for line in lines])
-    f.close()
-    v1s = []
-    v2s = []
-    for i in range(0,len(v1),1024):
-        v1s.append(v1[i:i+1024])
-        v2s.append(v2[i:i+1024])
-    return v1s,v2s
 
 def get_first_peak(sig,thresh = 1.2):
     trig = np.amax(np.abs(sig[:150]))*thresh
@@ -95,9 +111,3 @@ def good_fft(dt,y):
     w = np.arange(len(z))
     w = (w/dt)/(len(z)//2)
     return z,w
-
-sos300 = signal.butter(10, 300e3, 'hp', fs=20000000, output='sos')
-
-def filter300(sig):
-    filtered = signal.sosfilt(sos300,sig)
-    return filtered
