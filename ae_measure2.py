@@ -34,10 +34,12 @@ def filter_ae(ae_file, filter_csv):
 
 def read_ae_file2(fname, sig_length=1024):
     '''
-    fname: text file containing voltage over time
-    filter_csv: file of useful events, must be csv
-    return: (v1, v2, event_num), where v1 and v2 are the within gauge signals and
-            event_number is the event number indexed from 1
+    fname: text file containing voltage over time (string)
+    sig_length: number of data points per signal (int)
+
+    returns:
+    (v1, v2, ev): where v1 and v2 are signals and
+            ev is the event number indexed from 1
     '''
     f = open(fname)
     lines = f.readlines()[1:]
