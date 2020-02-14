@@ -187,10 +187,10 @@ def upscale(fingerprint, scale=80):
 
 def max_sig(signal1, signal2):
     '''
-    Gets signal of maximum intensity
+    Gets signal of maximum intensity, currrently
 
-    signal1: signal from channel 1 (array-like)
-    signal2: signal from channel 2 (array-like)
+    signal1: signal from channel 1, single event (array-like)
+    signal2: signal from channel 2, single event (array-like)
 
     returns:
     sig: maximum between the two signals (array-like)

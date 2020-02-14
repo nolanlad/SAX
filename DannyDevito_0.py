@@ -80,16 +80,7 @@ pl.savefig('test.png')
 
 
 
-signal = []
 for i in range(len(v1)):
-    if max(abs(v1[i])) > max(abs(v2[i])):
-        signal.append(v1[i])
-    else:
-        signal.append(v2[i])
-signal = np.asarray(signal)
-
-
-for i in range(len(signal)):
     # navigate to appropriate directory
     if lads[i] == 0:
         os.chdir(home+path1)
@@ -101,7 +92,7 @@ for i in range(len(signal)):
         raise ValueError('A very bad thing happened here.')
 
     # save fingerprint in directory
-    fingerprint = get_fingerprint(signal[i], space)
+    fingerprint = get_fingerprint(max_sig(v1[i], v2[i]), space)
     name = 'Event_'+str(i)+'.png'
 
     fingerprint = upscale(fingerprint) #upscales image
