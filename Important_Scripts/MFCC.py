@@ -3,14 +3,7 @@ Author: Caelin Muir
 Contact: muir@ucsb.edu
 Version: 200124
 
-This script takes in a file path with multiple experiments as text files
-gets the silhouette score and davies bouldin score for min_cluster to
-max_cluster cluster. Each cluster is initialized 100 times do avoid falling
-into local minima.
-
-Plots are saved to same path as experiments.
-
-Note the initialization scheme defaults to k-means++. Random state is not called.
+Assumes all data is normalized
 '''
 
 #Imports
@@ -23,23 +16,65 @@ import pylab as pl
 import matplotlib.ticker as ticker
 from ae_measure2 import *
 from scipy.cluster.vq import whiten
+import os
+import sigproc #from github, need to cite if we end up using this.
+import base # see above
+
+
+# Jank
+def argmax2d(X):
+    n, m = X.shape
+    x_ = np.ravel(X)
+    k = np.argmax(x_)
+    i, j = k // m, k % m
+    return i, j
+
+
+# set paths for different cluster fingerprints
+path1 = '/cluster_1_prints'
+path2 = '/cluster_2_prints'
+path3 = '/cluster_3_prints'
+path4 = '/cluster_4_prints'
+home = os.getcwd()
+
+
 
 # initialize number of bins (i.e alphabet cardinality), binning scheme, and others
 NBINS = 5
-space = EqualBinSpace(NBINS) # have considered equiprobable, it doesn't work
+space = PercentileBinSpace(NBINS) # have considered equiprobable, it doesn't work
 min_cluster = 2
 max_cluster = 12
+dt = 0.0000001
+rate = 1/dt
+window = dt*1024 #Hardcoded for 1024 data points
+ratio = .01/.025*window
 
 # Read in file set
 batch1_fns = glob.glob("./Raw_Data/VTE_2/*.txt")
-print(batch1_fns)
-
 
 for f in batch1_fns:
-
+    # Get set of signals from 1 experiment with the highest value per channel
     v1, v2, ev= read_ae_file2(f)
-    X = get_vect(v1,v2,space)
+    sig=[]
+    for i in range(len(v1)):
+        sig.append(max_sig(v1[i], v2[i]))
+    sig = np.array(sig)
 
+    # jank code that converts raw signal to vector of mfcc
+    holder = []
+    for i in range(len(sig)):
+        holder.append(base.mfcc(sig[i], samplerate=rate, winlen=window,
+            winstep=ratio, lowfreq=300000, highfreq=1800000))
+
+    X = []
+    for i in range(len(sig)):
+        X.append(holder[i][0])
+
+
+
+    '''
+    CLUSTER STATISTICS ROUTINE
+    '''
     silh = np.array([]) # holder arrays
     db_score = np.array([])
 
@@ -86,3 +121,4 @@ for f in batch1_fns:
 
     pl.savefig(f[:-4]+'_stats.png')
     pl.clf()
+    print('Plot ' + str(f) + ' saved.')

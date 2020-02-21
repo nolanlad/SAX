@@ -3,10 +3,11 @@ Author: Caelin Muir
 Contact: muir@ucsb.edu
 Version: 200124
 
-This script takes in a file path with multiple experiments as text files
-gets the silhouette score and davies bouldin score for min_cluster to
-max_cluster cluster. Each cluster is initialized 100 times do avoid falling
-into local minima.
+This script generates a Devito analysis of the Fourier transform of the wave.
+The working hypothesis in this analysis is that frequency is commonly used to
+distinguish between sound in other fields (i.e. a birdcall is uniquely defined by
+its frequency content), and this is an appropriate analysis for our purposes.
+SAX is applied to the spectra to distinguish between spectra.
 
 Plots are saved to same path as experiments.
 
@@ -23,23 +24,92 @@ import pylab as pl
 import matplotlib.ticker as ticker
 from ae_measure2 import *
 from scipy.cluster.vq import whiten
+import os
+
+
+
+# Jank
+def argmax2d(X):
+    n, m = X.shape
+    x_ = np.ravel(X)
+    k = np.argmax(x_)
+    i, j = k // m, k % m
+    return i, j
+
+
+# set paths for different cluster fingerprints
+path1 = '/cluster_1_prints'
+path2 = '/cluster_2_prints'
+path3 = '/cluster_3_prints'
+path4 = '/cluster_4_prints'
+home = os.getcwd()
+
+
 
 # initialize number of bins (i.e alphabet cardinality), binning scheme, and others
 NBINS = 5
-space = EqualBinSpace(NBINS) # have considered equiprobable, it doesn't work
+space = PercentileBinSpace(NBINS) # have considered equiprobable, it doesn't work
 min_cluster = 2
 max_cluster = 12
+dt = 0.000001
 
 # Read in file set
 batch1_fns = glob.glob("./Raw_Data/VTE_2/*.txt")
-print(batch1_fns)
 
+
+v1, v2, ev= read_ae_file2(batch1_fns[0])
+
+#convert channels to frequency space
+sig = []
+for i in range(len(v1)):
+    sig.append(max_sig(v1[i], v2[i]))
+freq = []   # list of signals in frequency space
+for i in range(len(sig)):
+    z, w = good_fft(dt, sig[i])
+    freq.append(z)
+w = w/1000 # convert to kHz
+'''
+index1 = 0
+for i in range(len(w)):
+    if w[i]<350:
+        index1+=1
+
+index2 = 0
+for i in range(len(w)):
+    if w[i]<1000:
+        index2+=1
+
+
+pl.plot(w[index1:index2], freq[62][index1:index2])
+pl.show()
+
+
+'''
 
 for f in batch1_fns:
-
     v1, v2, ev= read_ae_file2(f)
-    X = get_vect(v1,v2,space)
 
+    #convert channels to frequency space
+    sig = []
+    for i in range(len(v1)):
+        sig.append(max_sig(v1[i], v2[i]))
+    freq = []   # list of signals in frequency space
+    for i in range(len(sig)):
+        z, w = good_fft(dt, sig[i])
+        freq.append(z)
+
+    index = 0
+    for i in range(len(w)):
+        if w[i]<300:
+            index+=1
+    for i in range(len(freq)):
+        freq[i]=freq[i][index:]
+
+
+
+
+
+    X = get_vect(freq, freq, space)
     silh = np.array([]) # holder arrays
     db_score = np.array([])
 

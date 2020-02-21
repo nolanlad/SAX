@@ -42,7 +42,7 @@ k = 3
 # Read in single file
 batch1_fns = glob.glob("./Raw_Data/VTE_2/HNS2_0826.txt")
 v1,v2, ev = read_ae_file2(batch1_fns[0])
-X = get_heatmaps(v1,v2,space)
+X = get_vect(v1,v2,space)
 
 # Cluster waveform
 kmeans = KMeans(n_clusters=k, n_init=100, tol=1e-6).fit(X)
