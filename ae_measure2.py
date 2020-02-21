@@ -108,7 +108,6 @@ def noise_reduce(sig):
     return signal.lfilter(b,a,sig)
 
 def good_fft(dt,y):
-    #dt = t[1]-t[0]
     z = np.abs(np.fft.fft(y))
     w = np.arange(len(z))
     w = (w/dt)/(len(z)//2)

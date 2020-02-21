@@ -101,7 +101,7 @@ def sax_normalize(signal):
     '''
     Normalizes signal to have mean 0 and unit variance
 
-    Signal: array-like
+    Signal: N*1 array-like
     '''
     x2 = signal - np.average(signal)
     x3 = x2/np.std(signal)
@@ -109,12 +109,12 @@ def sax_normalize(signal):
 
 
 #need to rename
-def to_word_bins(sig,space):
+def sig2word(sig, space):
     '''
     Generates SAX word
 
-    sig =
-    takes signal and desired spacing strategy and generates your word. 1D vector of voltage values
+    sig: AE signal (N*1 array-like)
+    space: spaceing strategy (class)
     '''
     bins = space.get_bins(sig)
     word = np.ones(len(sig))*-1
@@ -125,10 +125,13 @@ def to_word_bins(sig,space):
 
 
 # rename and document
-def word_to_subword_space(word,space):
+def word2heatmap(word, space):
     '''
-    takes a SAX word and generates a fingerprint sliding window size of 2 is
-    hard coded in this function and all others
+    word: SAX word, generated from sig2word (N*1 array-like)
+
+    return: heatmap (N*N array-like)
+
+    NOTE: sliding window size of 2 is hard coded in this function and all others
     '''
     heatmap = np.zeros((space.nbins,space.nbins))
     for i in range(len(word)-1):
@@ -138,34 +141,43 @@ def word_to_subword_space(word,space):
     return heatmap/(np.sum(heatmap))
 
 
-#document
-def isnormaldist(x):
-    k2, p = stats.normaltest(sax_normalize(v1[0]))
-    alpha = 1e-3
-    return alpha < p
-
-
-
-# rename and document
-def get_heatmaps(v1,v2,space):
+def get_fingerprint(sig, space):
     '''
-    v1, v2 are the different channels, space is defined breakpoints. Classes of these
-    can be found above.
+    sig: AE signal (N*1 array-like)
+    space: Spacing strategy (class)
+
+    return: fingerprint, matrix of signal determined by space (N*N array-like)
+    '''
+    word = sig2word(sig,space)
+    fingerprint = word2heatmap(word,space)
+    return fingerprint
+
+# rename(?)
+def get_vect(v1, v2, space):
+    '''
+    v1, v2: Channel 1, 2 (N*1 array-like)
+    space: Spacing strategy (class)
+
+    return: X, vector representation of signal determined by space (array-like)
     '''
     X = []
     for i in range(len(v1)):
-        sig = max_sig(v1[i], v2[i]) # get highest signal
-        word = to_word_bins(sig,space)
-        heatmap = word_to_subword_space(word,space)
+        word = sig2word(max_sig(v1[i], v2[i]),space)
+        heatmap = word2heatmap(word, space)
         X.append(space.to_vect(heatmap))
     return X
 
-
 #document
-def get_fingerprint(sig,space):
-    word = to_word_bins(sig,space)
-    heatmap = word_to_subword_space(word,space)
-    return heatmap
+def isnormaldist(x):
+    '''
+    Null hypothesis is x is normal distribution
+    x: array-like
+    '''
+    k2, p = st.normaltest(x)
+    alpha = 1e-3
+    return p>alpha, p
+
+
 
 
 #document/reformat
