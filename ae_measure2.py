@@ -1,8 +1,18 @@
+'''
+Author: Nolan McCarthy
+Contact: nolanrmccarthy@gmail.com
+Version: 200312
+
+This is a class definition and function definition file for parsing AE signals
+as developed by the Daly Lab
+'''
+
 from scipy import signal
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas
 from scipy.stats import linregress
+
 
 nan = float('nan')
 inf = float('inf')
@@ -24,11 +34,66 @@ def filter_ae(ae_file, filter_csv):
     events = np.array(csv.Event)
     ev = events[np.where(np.isnan(events) == False)]
     ev = ev.astype(int)
-    v1,v2 = read_ae_file2(ae_file)
+    v1,v2, _ = read_ae_file2(ae_file)
     v1 = np.array(v1); v2 = np.array(v2)
     v1 = v1[ev-1]
     v2 = v2[ev-1]
     return v1, v2, ev
+
+
+
+def is_clipped(sig):
+    '''
+    Determines if a signal is clipped
+    sig: AE signal (N*1 array-like)
+    return: bool (boolean)
+    '''
+    bool = False
+    sig = np.abs(sig)
+    max = np.max(np.round(sig, decimals=2))
+    sig = sig[np.where(sig==max)]
+    if len(sig)>1:
+        bool=True
+    return bool
+
+def remove_clipped(v1, v2, ev, time = []):
+    '''
+    if both signals are clipped, removes both signals.
+    v1: Signal from channel 1 (N*1 array-like)
+    v2: Signal from channel 2 (N*1 array-like)
+    event_num: where v1 and v2 are the within gauge signals and
+            event_number is the event number indexed from 1
+    return: (v1, v2, event_num), where v1 and v2 are the within gauge signals and
+            event_number is the event number indexed from 1
+    '''
+    if len(time)!=0:
+        holder1 = []
+        holder2 = []
+        holder3 = []
+        holder4 = []
+        for i in range(len(v1)):
+            if is_clipped(v1[i]) and is_clipped(v2[i]):
+                pass
+            else:
+                holder1.append(v1[i])
+                holder2.append(v2[i])
+                holder3.append(ev[i])
+                holder4.append(time[i])
+        return holder1, holder2, holder3, holder4
+    else:
+        holder1 = []
+        holder2 = []
+        holder3 = []
+        for i in range(len(v1)):
+            if is_clipped(v1[i]) and is_clipped(v2[i]):
+                pass
+            else:
+                holder1.append(v1[i])
+                holder2.append(v2[i])
+                holder3.append(ev[i])
+                holder4.append(time[i])
+        return holder1, holder2, holder3
+
 
 
 
@@ -60,6 +125,45 @@ def read_ae_file2(fname, sig_length=1024):
     v2s = np.array(v2s)
 
     return v1s, v2s, ev
+
+
+
+def max_sig(signal1, signal2):
+    '''
+    Gets signal of maximum intensity, currrently
+
+    signal1: signal from channel 1, single event (array-like)
+    signal2: signal from channel 2, single event (array-like)
+
+    returns:
+    sig: maximum between the two signals (array-like)
+    '''
+    if max(abs(signal1)) > max(abs(signal2)):
+        sig=signal1
+    else:
+        sig=signal2
+    return sig
+
+
+def min_sig(signal1, signal2):
+    '''
+    Gets signal of maximum intensity, currrently
+
+    signal1: signal from channel 1, single event (array-like)
+    signal2: signal from channel 2, single event (array-like)
+
+    returns:
+    sig: maximum between the two signals (array-like)
+    '''
+    if max(abs(signal1)) > max(abs(signal2)):
+        sig=signal2
+    else:
+        sig=signal1
+    return sig
+
+
+
+
 
 
 
@@ -108,7 +212,6 @@ def noise_reduce(sig):
     return signal.lfilter(b,a,sig)
 
 def good_fft(dt,y):
-    #dt = t[1]-t[0]
     z = np.abs(np.fft.fft(y))
     w = np.arange(len(z))
     w = (w/dt)/(len(z)//2)

@@ -1,7 +1,7 @@
 '''
 Author: Nolan McCarthy
 Contact: nolanrmccarthy@gmail.com
-Version: 200213
+Version: 200312
 
 This is a class definition and function definition file for SAX clustering routine
 as developed by the Daly Lab
@@ -10,7 +10,7 @@ as developed by the Daly Lab
 
 
 
-from ae_measure2 import read_ae_file2
+from ae_measure2 import *
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
@@ -38,7 +38,7 @@ class EqualBinSpace:
 class FullBinSpace:
     '''
     Creates class for SAX scheme with equally spaced breakpoints, returns full
-    vector to cluster over
+    vector to cluster over. DOESN'T SEEM TO BE WORKING, NEED TO CHECK
     '''
     def __init__(self,nbins):
         self.nbins = nbins
@@ -55,7 +55,7 @@ class FullBinSpace:
 
 class GaussBinSpace:
     '''
-    Class for SAX scheme wtih equiprobable bin spacings assuming a Gaussian distribution
+    Class for SAX scheme with equiprobable bin spacings assuming a Gaussian distribution
     Note this functionality does not work
     '''
     def __init__(self,nbins):
@@ -88,12 +88,9 @@ class PercentileBinSpace:
         return bins
     def to_vect(self,heatmap):
         vect = []
-        #get the diagonal
-        for i in range(self.nbins):
-            vect.append(heatmap[i][i])
-        #get just above the diagonal
-        for i in range(self.nbins-1):
-            vect.append(heatmap[i][i+1])
+        for n in range(self.nbins):
+            for m in range(self.nbins):
+                vect.append(heatmap[n][m])
         return vect
 
 
@@ -101,7 +98,7 @@ def sax_normalize(signal):
     '''
     Normalizes signal to have mean 0 and unit variance
 
-    Signal: array-like
+    Signal: N*1 array-like
     '''
     x2 = signal - np.average(signal)
     x3 = x2/np.std(signal)
@@ -109,26 +106,29 @@ def sax_normalize(signal):
 
 
 #need to rename
-def to_word_bins(sig,space):
+def sig2word(sig, space):
     '''
     Generates SAX word
 
-    sig =
-    takes signal and desired spacing strategy and generates your word. 1D vector of voltage values
+    sig: AE signal (N*1 array-like)
+    space: spaceing strategy (class)
     '''
     bins = space.get_bins(sig)
     word = np.ones(len(sig))*-1
-    for i in range(0,len(bins)-1):
+    for i in range(len(bins)-1):
         is_bin = (sig >= bins[i])&(sig <= bins[i+1])
         word[np.where(is_bin)] = i
     return word
 
 
 # rename and document
-def word_to_subword_space(word,space):
+def word2heatmap(word, space):
     '''
-    takes a SAX word and generates a fingerprint sliding window size of 2 is
-    hard coded in this function and all others
+    word: SAX word, generated from sig2word (N*1 array-like)
+
+    return: heatmap (N*N array-like)
+
+    NOTE: sliding window size of 2 is hard coded in this function and all others
     '''
     heatmap = np.zeros((space.nbins,space.nbins))
     for i in range(len(word)-1):
@@ -138,34 +138,53 @@ def word_to_subword_space(word,space):
     return heatmap/(np.sum(heatmap))
 
 
-#document
-def isnormaldist(x):
-    k2, p = stats.normaltest(sax_normalize(v1[0]))
-    alpha = 1e-3
-    return alpha < p
-
-
-
-# rename and document
-def get_heatmaps(v1,v2,space):
+def get_fingerprint(sig, space):
     '''
-    v1, v2 are the different channels, space is defined breakpoints. Classes of these
-    can be found above.
+    sig: AE signal (N*1 array-like)
+    space: Spacing strategy (class)
+
+    return: fingerprint, matrix of signal determined by space (N*N array-like)
+    '''
+    word = sig2word(sig,space)
+    fingerprint = word2heatmap(word,space)
+    return fingerprint
+
+# rename(?)
+def get_vect(v1, v2, space):
+    '''
+    v1, v2: Channel 1, 2 (N*1 array-like)
+    space: Spacing strategy (class)
+
+    return: X, vector representation of signal determined by space, ignores
+    clipped signals (array-like)
     '''
     X = []
     for i in range(len(v1)):
-        sig = max_sig(v1[i], v2[i]) # get highest signal
-        word = to_word_bins(sig,space)
-        heatmap = word_to_subword_space(word,space)
-        X.append(space.to_vect(heatmap))
+        if is_clipped(v1[i]):
+            word = sig2word(v2[i],space)
+            heatmap = word2heatmap(word, space)
+            X.append(space.to_vect(heatmap))
+        elif is_clipped(v2[i]):
+            word = sig2word(v1[i],space)
+            heatmap = word2heatmap(word, space)
+            X.append(space.to_vect(heatmap))
+        else:
+            word = sig2word(max_sig(v1[i], v2[i]),space)
+            heatmap = word2heatmap(word, space)
+            X.append(space.to_vect(heatmap))
     return X
 
-
 #document
-def get_fingerprint(sig,space):
-    word = to_word_bins(sig,space)
-    heatmap = word_to_subword_space(word,space)
-    return heatmap
+def isnormaldist(x):
+    '''
+    Null hypothesis is x is normal distribution
+    x: array-like
+    '''
+    k2, p = st.normaltest(x)
+    alpha = 1e-3
+    return p>alpha, p
+
+
 
 
 #document/reformat
@@ -183,20 +202,54 @@ def upscale(fingerprint, scale=80):
             new_data[j * scale: (j+1) * scale, k * scale: (k+1) * scale] = fingerprint[j, k]
     return new_data
 
-
-
-def max_sig(signal1, signal2):
+def allEqual(iterator):
     '''
-    Gets signal of maximum intensity, currrently
-
-    signal1: signal from channel 1, single event (array-like)
-    signal2: signal from channel 2, single event (array-like)
-
-    returns:
-    sig: maximum between the two signals (array-like)
+    Helper function to check if all elements in an interator are equal
     '''
-    if max(abs(signal1)) > max(abs(signal2)):
-        sig=signal1
-    else:
-        sig=signal2
-    return sig
+    return len(set(iterator)) <= 1
+
+def get_longest_substring(word):
+    '''
+    Finds the location of the longest repeating subword
+
+    X: SAX word (N*1 array-like)
+
+    return: ans, index (length of longest substring and index)
+    '''
+    ans, temp, index = 1, 1, 0
+
+    # Traverse the string
+    for i in range(1, len(word)):
+
+        # If character is same as
+        # previous increment temp value
+        if (word[i] == word[i - 1]):
+            temp += 1
+        else:
+            if temp==max(ans, temp):
+                index = i-temp
+            ans = max(ans, temp)
+            temp = 1
+    ans = max(ans, temp)
+
+    if index == 0:
+        raise ValueError('Longest string found at begining')
+    # Return the required answer
+    return ans, index
+
+
+
+# Jank
+def argmax2d(X):
+    '''
+    Finds the location of the maximum value in a 2-D array
+
+    X: 2D array-like
+
+    return: i, j (indicies)
+    '''
+    n, m = X.shape
+    x_ = np.ravel(X)
+    k = np.argmax(x_)
+    i, j = k // m, k % m
+    return i, j
